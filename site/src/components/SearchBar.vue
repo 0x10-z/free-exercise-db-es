@@ -1,5 +1,5 @@
 <script>
-import exercises from '../../../dist/exercises.json'
+import exercises from '../../../dist/exercises_es.json'
 import ExerciseInstructions from './ExerciseInstructions.vue'
 import PhotoGallery from './PhotoGallery.vue'
 
@@ -24,17 +24,90 @@ export default {
       pageSize: 50,
       currentPage: 0,
       savedExercises: [],
-      showSavedExercises: false
+      showSavedExercises: false,
+      filterPrimaryMuscle: '',
+      filterEquipment: '',
+      filterLevel: '',
+      filterForce: ''
     }
   },
   computed: {
+    filteredExercises() {
+      return this.searchResults.filter((exercise) => {
+        return (
+          (!this.filterPrimaryMuscle ||
+            exercise.primaryMuscles.includes(this.filterPrimaryMuscle)) &&
+          (!this.filterEquipment || exercise.equipment === this.filterEquipment) &&
+          (!this.filterLevel || exercise.level === this.filterLevel) &&
+          (!this.filterForce || exercise.force === this.filterForce)
+        )
+      })
+    },
+
+    uniquePrimaryMuscles() {
+      const muscleCount = {}
+      this.exercises.forEach((exercise) => {
+        exercise.primaryMuscles.forEach((muscle) => {
+          if (muscle) {
+            muscleCount[muscle] = (muscleCount[muscle] || 0) + 1
+          }
+        })
+      })
+      return Object.keys(muscleCount)
+        .map((muscle) => ({
+          name: muscle,
+          count: muscleCount[muscle]
+        }))
+        .sort((a, b) => a.name.localeCompare(b.name))
+    },
+
+    uniqueEquipment() {
+      const equipmentCount = {}
+      this.exercises.forEach((exercise) => {
+        const equipment = exercise.equipment
+        if (equipment) {
+          equipmentCount[equipment] = (equipmentCount[equipment] || 0) + 1
+        }
+      })
+      return Object.keys(equipmentCount)
+        .map((equipment) => ({
+          name: equipment,
+          count: equipmentCount[equipment]
+        }))
+        .sort((a, b) => a.name.localeCompare(b.name))
+    },
+
+    uniqueLevels() {
+      const levelCount = {}
+      this.exercises.forEach((exercise) => {
+        const level = exercise.level
+        if (level) {
+          levelCount[level] = (levelCount[level] || 0) + 1
+        }
+      })
+      return Object.keys(levelCount).map((level) => ({ name: level, count: levelCount[level] }))
+    },
+
+    uniqueForces() {
+      const forceCount = {}
+      this.exercises.forEach((exercise) => {
+        const force = exercise.force
+        if (force) {
+          forceCount[force] = (forceCount[force] || 0) + 1
+        }
+      })
+      return Object.keys(forceCount)
+        .map((force) => ({ name: force, count: forceCount[force] }))
+        .sort((a, b) => a.name.localeCompare(b.name))
+    },
+
     // TODO: Refactor this, it's a mess
     savedItemClasses() {
       let color = this.showSavedExercises ? 'blue' : 'gray'
 
       let colors = {
         [`bg-${color}-700`]: true,
-        [`hover:bg-${color}-800`]: true,
+        [`hover:bg-${color}-700`]: true,
         [`dark:bg-${color}-800`]: true,
         [`dark:hover:bg-${color}-700`]: true,
         [`dark:focus:ring-${color}-800`]: true,
@@ -128,6 +201,49 @@ export default {
 }
 </script>
 <template>
+  <div class="w-full flex">
+    <!-- Dropdowns para Muscles -->
+    <div class="w-1/4 p-2">
+      <select v-model="filterPrimaryMuscle" class="w-full p-2 border rounded">
+        <option value="">Músculos</option>
+        <!-- Opciones dinámicas basadas en los datos -->
+        <!-- Suponiendo que tienes un array uniquePrimaryMuscles -->
+        <option v-for="muscle in uniquePrimaryMuscles" :key="muscle" :value="muscle">
+          {{ muscle.name }} ({{ muscle.count }})
+        </option>
+      </select>
+    </div>
+
+    <!-- Dropdown para Equipment -->
+    <div class="w-1/4 p-2">
+      <select v-model="filterEquipment" class="w-full p-2 border rounded">
+        <option value="">Equipment</option>
+        <option v-for="equipment in uniqueEquipment" :key="equipment" :value="equipment">
+          {{ equipment.name }} ({{ equipment.count }})
+        </option>
+      </select>
+    </div>
+
+    <!-- Dropdown para Levels -->
+    <div class="w-1/4 p-2">
+      <select v-model="filterLevel" class="w-full p-2 border rounded">
+        <option value="">Level</option>
+        <option v-for="level in uniqueLevels" :key="level" :value="level">
+          {{ level.name }} ({{ level.count }})
+        </option>
+      </select>
+    </div>
+
+    <!-- Dropdown para Forces -->
+    <div class="w-1/4 p-2">
+      <select v-model="filterForce" class="w-full p-2 border rounded">
+        <option value="">Force Type</option>
+        <option v-for="force in uniqueForces" :key="force" :value="force">
+          {{ force.name }} ({{ force.count }})
+        </option>
+      </select>
+    </div>
+  </div>
   <div class="flex">
     <div class="w-full">
       <form @submit.prevent="onSubmit">
@@ -161,7 +277,7 @@ export default {
             autofocus="autofocus"
             id="search"
             class="block w-full p-4 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-            placeholder="Search Exercises, Instructions"
+            placeholder="Busca ejercicios, Instrucciones..."
             required
           />
         </div>
@@ -193,7 +309,7 @@ export default {
       v-for="exercise in paginatedItems"
       v-bind:key="exercise.name"
       :class="savedItemClasses"
-      class="exercise flex flex-col relative mt-4 items-center justify-between bg-white border border-gray-200 rounded-lg shadow md:flex-row md:max-w-xl dark:border-gray-700"
+      class="exercise flex flex-col relative mt-4 items-center hover:bg-gray-300 cursor-pointer justify-between bg-white border border-gray-200 rounded-lg shadow md:flex-row md:max-w-xl dark:border-gray-700"
     >
       <div class="w-full md:h-auto md:w-60">
         <PhotoGallery :photos="exercise.images" />
