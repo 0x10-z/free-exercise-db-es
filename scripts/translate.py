@@ -6,8 +6,7 @@ from tqdm import tqdm
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 client = OpenAI(
-    # This is the default and can be omitted
-    api_key='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',
+    api_key='<openai_apikey>',
 )
 
 def load_translations():
