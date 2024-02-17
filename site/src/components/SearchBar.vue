@@ -9,6 +9,10 @@ import { BookmarkIcon as BookmarkIconSolid } from '@heroicons/vue/24/solid'
 
 import Fuse from 'fuse.js'
 
+function capitalizeFirstLetter(string) {
+  return string.charAt(0).toUpperCase() + string.slice(1)
+}
+
 export default {
   components: {
     ExerciseInstructions,
@@ -55,7 +59,7 @@ export default {
       })
       return Object.keys(muscleCount)
         .map((muscle) => ({
-          name: muscle,
+          name: capitalizeFirstLetter(muscle),
           count: muscleCount[muscle]
         }))
         .sort((a, b) => a.name.localeCompare(b.name))
@@ -71,7 +75,7 @@ export default {
       })
       return Object.keys(equipmentCount)
         .map((equipment) => ({
-          name: equipment,
+          name: capitalizeFirstLetter(equipment),
           count: equipmentCount[equipment]
         }))
         .sort((a, b) => a.name.localeCompare(b.name))
@@ -85,7 +89,10 @@ export default {
           levelCount[level] = (levelCount[level] || 0) + 1
         }
       })
-      return Object.keys(levelCount).map((level) => ({ name: level, count: levelCount[level] }))
+      return Object.keys(levelCount).map((level) => ({
+        name: capitalizeFirstLetter(level),
+        count: levelCount[level]
+      }))
     },
 
     uniqueForces() {
@@ -97,7 +104,7 @@ export default {
         }
       })
       return Object.keys(forceCount)
-        .map((force) => ({ name: force, count: forceCount[force] }))
+        .map((force) => ({ name: capitalizeFirstLetter(force), count: forceCount[force] }))
         .sort((a, b) => a.name.localeCompare(b.name))
     },
 
@@ -217,7 +224,7 @@ export default {
     <!-- Dropdown para Equipment -->
     <div class="w-1/4 p-2">
       <select v-model="filterEquipment" class="w-full p-2 border rounded">
-        <option value="">Equipment</option>
+        <option value="">Equipamiento</option>
         <option v-for="equipment in uniqueEquipment" :key="equipment" :value="equipment">
           {{ equipment.name }} ({{ equipment.count }})
         </option>
@@ -227,7 +234,7 @@ export default {
     <!-- Dropdown para Levels -->
     <div class="w-1/4 p-2">
       <select v-model="filterLevel" class="w-full p-2 border rounded">
-        <option value="">Level</option>
+        <option value="">Nivel</option>
         <option v-for="level in uniqueLevels" :key="level" :value="level">
           {{ level.name }} ({{ level.count }})
         </option>
@@ -237,7 +244,7 @@ export default {
     <!-- Dropdown para Forces -->
     <div class="w-1/4 p-2">
       <select v-model="filterForce" class="w-full p-2 border rounded">
-        <option value="">Force Type</option>
+        <option value="">Tipo fuerza</option>
         <option v-for="force in uniqueForces" :key="force" :value="force">
           {{ force.name }} ({{ force.count }})
         </option>
@@ -304,7 +311,7 @@ export default {
       </button>
     </div>
   </div>
-  <div id="infinite-list">
+  <div id="infinite-list" class="w-full flex flex-col items-center">
     <div
       v-for="exercise in paginatedItems"
       v-bind:key="exercise.name"

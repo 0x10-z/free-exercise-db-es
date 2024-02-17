@@ -4,7 +4,7 @@ import SearchBar from './components/SearchBar.vue'
 <template>
   <header></header>
   <main>
-    <a href="https://github.com/yuhonas/free-exercise-db" class="github"
+    <a href="https://github.com/0x10-z/free-exercise-db-es" target="_blank" class="github"
       ><img
         decoding="async"
         loading="lazy"
